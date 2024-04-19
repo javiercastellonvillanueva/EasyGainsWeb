@@ -41,7 +41,7 @@ if st.button('Click Here To Analyze'):
     # Encode the uploaded or taken image
     base64_image = encode_image(image)
 
-    api_key = st.secrets["api_key"]
+    api_key = st.secrets["apikey"]
     headers = {
       "Content-Type": "application/json",
       "Authorization": f"Bearer {api_key}"
