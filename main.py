@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import base64
+import anthropic
 from PIL import Image
 from io import BytesIO
 
@@ -40,29 +41,37 @@ if st.button('Click Here To Analyze'):
 
     # Encode the uploaded or taken image
     base64_image = encode_image(image)
+    
+    client = anthropic.Anthropic(
+        # defaults to os.environ.get("ANTHROPIC_API_KEY")
+        api_key="my_api_key",
+    )
+    message = client.messages.create(
+        model="claude-3-haiku-20240307",
+        max_tokens=1000,
+        temperature=0.5,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "tell me the calorie count, proteins, carbs, and fats of the meal in this image. do not explain more. be concise."
+                    },
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": "image/jpeg",
+                            "data": "<base64_encoded_image>"
+                        }
+                    }
+                ]
+            }
+        ]
+    )
+    print(message.content)
 
-    apikey = st.secrets["apikey"]
-    headers = {
-      "Content-Type": "application/json",
-      "Authorization": f"Bearer {apikey}"
-    }
-
-    payload = {
-      "model": "gpt-4-vision-preview",
-      "messages": [
-        {
-          "role": "user",
-          "content": "please describe the nutritional information of the following image, please include total calories (not in kcals) as well as how many grams of protein, carbs, and fats, the meal in the image has"
-        },
-        {
-          "role": "system",
-          "content": f"data:image/jpeg;base64,{base64_image}"
-        }
-      ],
-      "max_tokens": 300
-    }
-
-    # Send the request to OpenAI
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
     response_data = response.json()
 
@@ -71,4 +80,3 @@ if st.button('Click Here To Analyze'):
       st.write(content)
     except (KeyError, IndexError, TypeError):
       st.error("There was an error processing the response from OpenAI.")
-
