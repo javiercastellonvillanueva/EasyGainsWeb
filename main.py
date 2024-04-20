@@ -48,7 +48,7 @@ if st.button('Click Here To Analyze'):
     }
 
     payload = {
-      "model": "gpt-4-turbo",
+      "model": "gpt-4-vision-preview",
       "messages": [
         {
           "role": "user",
